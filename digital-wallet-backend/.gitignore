@@ -1,0 +1,55 @@
+node_modules# Dependencias
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Archivos de entorno
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs
+*.log
+
+# Archivos de sistema operativo
+.DS_Store
+Thumbs.db
+
+# Directorios de cobertura de pruebas
+coverage/
+
+# Directorio de construcción
+dist/
+build/
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Archivos de IDE y editores
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Archivos de caché
+.cache/
+
+# Otros
+*.gz
+*.tgz
+
+# Archivos de Docker
+*.dockerignore
+
+# Archivos de Redis
+dump.rdb
+
+# Archivos de certificados SSL (si los tienes localmente)
+*.pem
+*.key
+*.crt
+
+# Archivos de respaldo
+*.bak
