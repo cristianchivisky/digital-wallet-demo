@@ -6,6 +6,8 @@ import { useAuth } from '../hooks/authContext';
 import { validateInputs } from '../utils/validateInputs';
 import ToastNotification from '../components/ToastNotification';
 
+type ToastType = 'success' | 'danger';
+
 export default function AuthScreen() {
   const router = useRouter();
   const [username, setUsername] = useState('');
@@ -14,9 +16,13 @@ export default function AuthScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false); // Estado para alternar entre login y registro
   const { setIsAuthenticated } = useAuth(); // Contexto para gestionar el estado de autenticación
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
 
-  const showToast = (message, type) => {
+  const showToast = (message: string, type: ToastType) => {
     setToast({ visible: true, message, type });
   };
 

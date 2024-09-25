@@ -5,6 +5,8 @@ import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToastNotification from '../components/ToastNotification';
 
+type ToastType = 'success' | 'danger';
+
 export default function HomeScreen() {
   const router = useRouter();
   const [balance, setBalance] = useState(null);
@@ -12,9 +14,13 @@ export default function HomeScreen() {
   const [scanned, setScanned] = useState(false); // Estado para gestionar si el código QR fue escaneado
   const [isCameraActive, setIsCameraActive] = useState(false); // Estado para activar o desactivar la cámara
   const [facing, setFacing] = useState<CameraType>('back'); // Estado para alternar la cámara entre frontal y trasera
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
 
-  const showToast = (message, type) => {
+  const showToast = (message: string, type: ToastType) => {
     setToast({ visible: true, message, type });
   };
 
@@ -135,7 +141,7 @@ export default function HomeScreen() {
           <CameraView
             style={styles.camera} 
             facing={facing} // Define la dirección de la cámara (frontal o trasera)
-            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned} // Solo escanea si no ha sido escaneado
+            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned} 
           />
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>

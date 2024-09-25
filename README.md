@@ -32,16 +32,23 @@ The mobile app is built with React Native and Expo. It provides a user interface
 - Scanning QR codes
 - Making payments
 
-## Setup and Installation
+## Setup and Installation 
 
 ### Prerequisites
 
 - Node.js
 - Docker
+- Git
+
+1. Open your terminal or command prompt.
+2. Clone the repository:
+   ```
+   git clone https://github.com/cristianchivisky/digital-wallet-demo.git
+   ```
 
 ### Backend Setup
 
-1. Navigate to the backend directory.
+1. Navigate to the backend directory:
 2. Create a `.env` file in the backend directory and add the following line:
    ```
    SECRET_KEY=your_secret_key_here
@@ -49,8 +56,6 @@ The mobile app is built with React Native and Expo. It provides a user interface
 3. Build and start the Docker containers:
    ```
    docker compose build
-   ```
-   ```
    docker compose up
    ```
 
@@ -58,7 +63,7 @@ This will start the Node.js server and Redis database.
 
 ### Mobile App Setup
 
-1. Navigate to the mobile app directory.
+1. Navigate to the mobile app directory:
 2. Install dependencies:
    ```
    npm install
@@ -125,4 +130,4 @@ Please ensure your code adheres to the existing style and that you've tested you
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See the LICENSE file for details.

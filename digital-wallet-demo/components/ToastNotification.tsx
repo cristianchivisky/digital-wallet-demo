@@ -1,7 +1,15 @@
 import React, { useEffect, useRef } from 'react';
 import { Text, StyleSheet, Animated } from 'react-native';
 
-const ToastNotification = ({ message, type = 'success', onHide }) => {
+type ToastType = 'success' | 'danger';
+
+interface ToastNotificationProps {
+  message: string;
+  type: ToastType;
+  onHide: () => void;
+}
+
+const ToastNotification: React.FC<ToastNotificationProps> = ({ message, type = 'success', onHide }) => {
   const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {

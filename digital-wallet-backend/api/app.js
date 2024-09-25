@@ -4,6 +4,9 @@ import CORS from 'cors';
 import jwt from 'jsonwebtoken';
 import qrcode from 'qrcode';
 import bcrypt from 'bcrypt';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 

@@ -4,13 +4,19 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToastNotification from '../components/ToastNotification';
 
+type ToastType = 'success' | 'danger';
+
 export default function Payment() {
   const router = useRouter();
   const { transactionId, amount } = useLocalSearchParams<{ transactionId: string; amount: string }>(); // Obtiene los parámetros de la URL
   const [isPaying, setIsPaying] = useState(false);
-  const [toast, setToast] = useState({ visible: false, message: '', type: 'success' });
-  
-  const showToast = (message, type) => {
+  const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
+    visible: false,
+    message: '',
+    type: 'success',
+  });
+
+  const showToast = (message: string, type: ToastType) => {
     setToast({ visible: true, message, type });
   };
 
