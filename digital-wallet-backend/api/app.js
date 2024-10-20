@@ -128,6 +128,15 @@ app.post('/process-payment', authenticateToken, async (req, res) => {
   user.balance = (parseFloat(user.balance) - amount).toString(); // Calculamos el nuevo saldo
   // Guardamos el nuevo saldo en Redis
   await redisClient.hSet(`user:${req.user.username}`, 'balance', user.balance);
+  // Almacenamos el pago en Redis
+  const paymentId = Date.now().toString(); // o utiliza un ID único
+  const paymentDetails = {
+    paymentId,
+    transactionId,
+    amount,
+    timestamp: new Date().toISOString(),
+  };
+  await redisClient.hSet(`payments:${req.user.username}`, paymentId, JSON.stringify(paymentDetails));
   res.json({ message: 'Payment successful', newBalance: user.balance });
 });
 
@@ -135,7 +144,9 @@ app.post('/process-payment', authenticateToken, async (req, res) => {
 app.get('/balance', authenticateToken, async (req, res) => {
   // Obtenemos los detalles del usuario desde Redis
   const user = await redisClient.hGetAll(`user:${req.user.username}`); 
-  res.json({ balance: user.balance });
+  const payments = await redisClient.hGetAll(`payments:${req.user.username}`);
+  const paymentsArray = Object.values(payments).map(payment => JSON.parse(payment));
+  res.json({ balance: user.balance, payments: paymentsArray });
 });
 
 const PORT = process.env.PORT || 3000;

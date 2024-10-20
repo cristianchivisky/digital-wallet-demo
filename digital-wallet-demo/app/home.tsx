@@ -1,15 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Button, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Button, TouchableOpacity, StyleSheet, SafeAreaView, FlatList, ScrollView } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToastNotification from '../components/ToastNotification';
+import { useApp } from '../hooks/appContext';
 
 type ToastType = 'success' | 'danger';
+interface Payment {
+  paymentId: string;
+  transactionId: string;
+  amount: string; 
+  timestamp: string; 
+}
 
 export default function HomeScreen() {
   const router = useRouter();
   const [balance, setBalance] = useState(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [permission, requestPermission] = useCameraPermissions(); // Estado y permisos de la cámara
   const [scanned, setScanned] = useState(false); // Estado para gestionar si el código QR fue escaneado
   const [isCameraActive, setIsCameraActive] = useState(false); // Estado para activar o desactivar la cámara
@@ -19,6 +27,7 @@ export default function HomeScreen() {
     message: '',
     type: 'success',
   });
+  const { setScanQRCode } = useApp();
 
   const showToast = (message: string, type: ToastType) => {
     setToast({ visible: true, message, type });
@@ -28,30 +37,74 @@ export default function HomeScreen() {
     setToast(prevToast => ({ ...prevToast, visible: false }));
   };
 
-  // useEffect para obtener el balance del usuario cuando el componente se monta
+  // Función que se activa al presionar el botón para escanear un QR
+  const handleScanQRCode = async () => {
+    setIsCameraActive(true); // Activa la cámara
+    setScanned(false); // Resetea el estado de escaneo
+    try {
+      const token = await AsyncStorage.getItem('accessToken');
+      // Solicitud para generar un código QR con una cantidad fija (random)
+      const amount = Math.floor(Math.random() * 1000); // Genera un número aleatorio entre 0 y 999
+      const response = await fetch(`http://localhost:3000/generate-qr?amount=${amount}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      const qrData = await response.json(); // Parsear la respuesta de la API
+      // Si la respuesta es exitosa, redirige a la pantalla de pago después de 8 segundos
+      if (response.ok) {
+        console.log('QR Code Data:', qrData); // Mostrar el QR en la terminal
+        setTimeout(() => {
+          setIsCameraActive(false); // Desactiva la cámara
+          router.push({
+            pathname: "./payment",
+            params: {
+              transactionId: qrData.transactionDetails.transactionId,
+              amount: qrData.transactionDetails.amount,
+            },
+          });
+        }, 8000);
+      } else {
+        // Si falla, muestra un mensaje de error
+        showToast('Failed to generate QR code', 'danger');
+      }
+    } catch (error) {
+      console.error('Error generating QR code:', error);
+      showToast('An error occurred while generating the QR code.', 'danger');
+    }
+  };
+
+  // useEffect para obtener el balance del usuario y los pagos cuando el componente se monta
   useEffect(() => {
-    const fetchBalance = async () => {
+    setScanQRCode(() => handleScanQRCode);
+    const fetchData = async () => {
       try {
-        // Obtiene el token de autenticación almacenado en el dispositivo
         const token = await AsyncStorage.getItem('accessToken');
-        // Realiza una solicitud para obtener el balance
-        const response = await fetch('http://localhost:3000/balance', {
+
+        // Obtiene el balance
+        const balanceResponse = await fetch('http://localhost:3000/balance', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}` // Envía el token en el encabezado
-          }
+            'Authorization': `Bearer ${token}`,
+          },
         });
-        // Parsear los datos obtenidos
-        const data = await response.json();
-        setBalance(data.balance); // Actualiza el estado del balance
+        const balanceData = await balanceResponse.json();
+        setBalance(balanceData.balance);
+        const sortedPayments = balanceData.payments.sort((a: Payment, b: Payment) => {
+          const dateA = new Date(a.timestamp);
+          const dateB = new Date(b.timestamp);
+          return dateB.getTime() - dateA.getTime();
+        });
+        setPayments(sortedPayments);
       } catch (error) {
-        // Muestra un mensaje de error en caso de que falle la solicitud
-        showToast(`Error fetching balance: ${error}`, 'danger');
+        showToast(`Error fetching data: ${error}`, 'danger');
       }
     };
-    // Llama a la función que obtiene el balance
-    fetchBalance();
+
+    fetchData();
   }, []);
 
   // Si los permisos de la cámara aún no están disponibles, no se muestra nada
@@ -94,53 +147,17 @@ export default function HomeScreen() {
     }
   };
 
-  // Función que se activa al presionar el botón para escanear un QR
-  const handleScanQRCode = async () => {
-    setIsCameraActive(true); // Activa la cámara
-    setScanned(false); // Resetea el estado de escaneo
-    try {
-      const token = await AsyncStorage.getItem('accessToken');
-      // Solicitud para generar un código QR con una cantidad fija (en este caso, 100)
-      const response = await fetch(`http://localhost:3000/generate-qr?amount=100`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      const qrData = await response.json(); // Parsear la respuesta de la API
-      // Si la respuesta es exitosa, redirige a la pantalla de pago después de 5 segundos
-      if (response.ok) {
-        setTimeout(() => {
-          setIsCameraActive(false); // Desactiva la cámara
-          router.push({
-            pathname: "./payment",
-            params: {
-              transactionId: qrData.transactionDetails.transactionId,
-              amount: qrData.transactionDetails.amount,
-            },
-          });
-        }, 5000);
-      } else {
-        // Si falla, muestra un mensaje de error
-        showToast('Failed to generate QR code', 'danger');
-      }
-    } catch (error) {
-      console.error('Error generating QR code:', error);
-      showToast('An error occurred while generating the QR code.', 'danger');
-    }
-  };
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.balanceContainer}>
         <Text style={styles.balanceText}>Current Balance: ${balance}</Text>
       </View>
+      
       {isCameraActive ? (
         <View style={styles.cameraContainer}>
           <CameraView
             style={styles.camera} 
-            facing={facing} // Define la dirección de la cámara (frontal o trasera)
+            facing={facing}
             onBarcodeScanned={scanned ? undefined : handleBarcodeScanned} 
           />
           <View style={styles.buttonContainer}>
@@ -150,19 +167,37 @@ export default function HomeScreen() {
           </View>
         </View>
       ) : (
-        // Botón para activar el escaneo del código QR
-        <TouchableOpacity style={styles.scanButton} onPress={handleScanQRCode}>
-          <Text style={styles.scanButtonText}>Scan QR Code</Text>
-        </TouchableOpacity>
+        // Hacer scroll solo en la lista de pagos
+        <View style={styles.container}>
+          <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
+            <View style={styles.paymentsContainer}>
+              <Text style={styles.paymentsTitle}>Payments:</Text>
+              <FlatList
+                data={payments}
+                keyExtractor={item => item.paymentId}
+                renderItem={({ item }) => (
+                  <View style={styles.paymentCard}>
+                    <Text style={styles.paymentText}>Transaction ID: {item.transactionId}</Text>
+                    <Text style={styles.paymentText}>Amount: ${item.amount}</Text>
+                    <Text style={styles.paymentText}>Date: {new Date(item.timestamp).toLocaleString()}</Text> {/* Mejora la visibilidad de la fecha */}
+                  </View>
+                )}
+              />
+            </View>
+          </ScrollView>
+          
+        </View>
       )}
+
       {scanned && (
         <TouchableOpacity style={styles.scanAgainButton} onPress={() => {
-          setScanned(false); // Permite escanear de nuevo
-          setIsCameraActive(true); // Activa la cámara
+          setScanned(false);
+          setIsCameraActive(true);
         }}>
           <Text style={styles.scanAgainButtonText}>Tap to Scan Again</Text>
         </TouchableOpacity>
       )}
+
       {toast.visible && (
         <ToastNotification
           message={toast.message}
@@ -182,7 +217,7 @@ const styles = StyleSheet.create({
   },
   balanceContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
     padding: 20,
     backgroundColor: '#ffffff',
     shadowColor: '#000',
@@ -235,23 +270,23 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
   },
-  scanButton: {
-    marginHorizontal: 20,
-    backgroundColor: '#007bff',
-    paddingVertical: 15,
-    paddingHorizontal: 40,
-    borderRadius: 30,
+  buttonScannContainer: {
+    justifyContent: 'center',
     alignItems: 'center',
+    bottom: 85,
+
+  },
+  scanButton: {
+    position: 'absolute',
+    borderRadius: 50,
+    
+    backgroundColor: '#007bff',
+    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
     elevation: 10,
-  },
-  scanButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
   },
   scanAgainButton: {
     backgroundColor: '#ffc107',
@@ -271,7 +306,32 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   message: {
+    fontSize: 18,
     textAlign: 'center',
-    paddingBottom: 10,
+    marginVertical: 20,
+    color: '#333',
+  },
+  paymentsContainer: {
+    paddingHorizontal: 20,
+  },
+  paymentsTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
+  },
+  paymentCard: {
+    backgroundColor: '#fff',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  paymentText: {
+    fontSize: 16,
   },
 });

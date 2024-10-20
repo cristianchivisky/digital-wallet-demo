@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -22,6 +22,20 @@ export default function AuthScreen() {
     type: 'success',
   });
 
+  // Verificar autenticación al montar el componente
+  useEffect(() => {
+    const checkAuthStatus = async () => {
+      const token = await AsyncStorage.getItem('accessToken');
+      if (token) {
+        // Si el token existe, redirige a la pantalla principal
+        setIsAuthenticated(true);
+        router.replace('./home'); // Reemplazar para evitar volver atrás
+      }
+    };
+
+    checkAuthStatus(); // Ejecutar la función al montar el componente
+  }, []);
+
   const showToast = (message: string, type: ToastType) => {
     setToast({ visible: true, message, type });
   };
@@ -41,7 +55,7 @@ export default function AuthScreen() {
     setIsLoading(true); // Indicar que se está cargando
     try {
       // Realizar solicitud de login
-      const response = await fetch('http://localhost:3000/login', {
+      const response = await fetch('http://192.168.1.4:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,6 +67,7 @@ export default function AuthScreen() {
       if (response.ok) {
         // Guardar el token de acceso en AsyncStorage y cambiar el estado de autenticación
         await AsyncStorage.setItem('accessToken', data.accessToken);
+        await AsyncStorage.setItem('userData', username);
         setIsAuthenticated(true);
         router.push('./home'); // Redirigir a la pantalla principal
       } else {
@@ -80,10 +95,10 @@ export default function AuthScreen() {
       return;
     }
     setIsLoading(true); // Indicar que se está cargando
-    const balance = 1000; // Establecer un balance inicial para el nuevo usuario
+    const balance = 10000; // Establecer un balance inicial para el nuevo usuario
     try {
       // Realizar solicitud de registro
-      const response = await fetch('http://localhost:3000/register', {
+      const response = await fetch('http://192.168.1.4:3000/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

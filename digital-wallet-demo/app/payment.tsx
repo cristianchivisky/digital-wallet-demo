@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToastNotification from '../components/ToastNotification';
+import { Ionicons } from '@expo/vector-icons'; 
 
 type ToastType = 'success' | 'danger';
 
@@ -78,6 +79,9 @@ export default function Payment() {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity style={styles.backButton} onPress={() => router.push('./home')}>
+        <Ionicons name="arrow-back" size={30} color="black" />
+      </TouchableOpacity>
       <Text style={styles.title}>Payment Details</Text>
       <View style={styles.detailsContainer}>
         <Text style={styles.detailText}>Transaction ID: {transactionId}</Text>
@@ -109,6 +113,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     backgroundColor: '#f0f2f5',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
   },
   title: {
     fontSize: 28,

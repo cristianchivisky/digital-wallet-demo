@@ -5,17 +5,22 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem('accessToken');
-      setIsAuthenticated(!!token);
+      const userData = await AsyncStorage.getItem('userData');
+      if (token && userData) {
+        setIsAuthenticated(true);
+        setUser(userData);
+      }
     };
     checkAuth();
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated, user, setUser }}>
       {children}
     </AuthContext.Provider>
   );
