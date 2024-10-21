@@ -1,133 +1,132 @@
 # Digital Wallet Demo
 
-This project is a demonstration of a digital wallet application with QR code-based payment functionality. It includes both a backend API built with Node.js and Express, and a frontend mobile app built with React Native and Expo.
+Este proyecto es una demo de una aplicación de billetera digital con funcionalidad de pago basada en códigos QR. Incluye tanto una API backend construida con Node.js y Express, como una aplicación móvil frontend construida con React Native y Expo.
 
-## Project Structure
+## Estructura del Proyecto
 
-The project consists of two main parts:
+El proyecto consta de dos partes principales:
 
-1. Backend API
-2. Mobile App
+1. API Backend
+2. Aplicación Móvil
 
-### Backend API
+### API Backend
 
-The backend is built with Node.js and Express, and uses Redis for data storage. It provides endpoints for:
+El backend está construido con Node.js y Express, y utiliza Redis para el almacenamiento de datos. Proporciona endpoints para:
 
-- User authentication
-- Balance verification
-- Payment processing
-- QR code generation
+- Autenticación de usuarios
+- Verificación de saldo
+- Procesamiento de pagos
+- Generación de códigos QR
 
-Key files:
-- `app.js`: Main application file
-- `Dockerfile`: Docker configuration for the backend
-- `docker-compose.yaml`: Docker Compose configuration for the entire project
+Archivos clave:
+- `app.js`: Archivo principal de la aplicación
+- `Dockerfile`: Configuración de Docker para el backend
+- `docker-compose.yaml`: Configuración de Docker Compose para todo el proyecto
 
-### Mobile App
+### Aplicación Móvil
 
-The mobile app is built with React Native and Expo. It provides a user interface for:
+La aplicación móvil está construida con React Native y Expo. Proporciona una interfaz de usuario para:
 
-- User registration and login
-- Viewing balance
-- Scanning QR codes
-- Making payments
+- Registro e inicio de sesión de usuarios
+- Ver el saldo
+- Escanear códigos QR
+- Realizar pagos
 
-## Setup and Installation 
+## Configuración e Instalación
 
-### Prerequisites
+### Requisitos Previos
 
 - Node.js
 - Docker
 - Git
 
-1. Open your terminal or command prompt.
-2. Clone the repository:
+1. Abre tu terminal o símbolo del sistema.
+2. Clona el repositorio:
    ```
    git clone https://github.com/cristianchivisky/digital-wallet-demo.git
    ```
 
-### Backend Setup
+### Configuración del Backend
 
-1. Navigate to the backend directory:
-2. Create a `.env` file in the backend directory and add the following line:
+1. Navega al directorio del backend:
+2. Crea un archivo `.env` en el directorio del backend y agrega la siguiente línea:
    ```
-   SECRET_KEY=your_secret_key_here
+   SECRET_KEY=tu_clave_secreta_aquí
    ```
-3. Build and start the Docker containers:
+3. Construye y ejecuta los contenedores de Docker:
    ```
    docker compose build
    docker compose up
    ```
+   Esto iniciará el servidor Node.js y la base de datos Redis.
 
-This will start the Node.js server and Redis database.
+### Configuración de la Aplicación Móvil
 
-### Mobile App Setup
-
-1. Navigate to the mobile app directory:
-2. Install dependencies:
+1. Navega al directorio de la aplicación móvil:
+2. Instala las dependencias:
    ```
    npm install
    ```
-3. Start the Expo development server:
+3. Inicia el servidor de desarrollo de Expo:
    ```
    npm run start
    ```
 
-## Usage
+## Uso
 
-1. Launch the mobile app on your device or emulator.
-2. Register or log in with your credentials.
-3. View your balance on the home screen.
-4. To make a payment:
-   - Click "Scan QR Code"
-   - Scan a valid QR code
-   - Confirm the payment on the Payment screen
+1. Inicia la aplicación móvil en tu dispositivo o emulador.
+2. Regístrate o inicia sesión con tus credenciales.
+3. Ver tu saldo en la pantalla de inicio.
+4. Para realizar un pago:
+   - Haz clic en "Escanear Código QR"
+   - Escanea un código QR válido
+   - Confirma el pago en la pantalla de Pago
 
-## API Endpoints
+## Endpoints de la API
 
-- `POST /register`: Register a new user
-- `POST /login`: Authenticate a user and receive a JWT
-- `GET /balance`: Get the user's current balance
-- `GET /generate-qr`: Generate a QR code for a transaction
-- `POST /process-payment`: Process a payment
+- `POST /register`: Registrar un nuevo usuario
+- `POST /login`: Autenticar a un usuario y recibir un JWT
+- `GET /balance`: Obtener el saldo actual del usuario
+- `GET /generate-qr`: Generar un código QR para una transacción
+- `POST /process-payment`: Procesar un pago
 
-## Security
+## Seguridad
 
-- JWT (JSON Web Tokens) are used for authentication.
-- Passwords are securely hashed before storage.
+- Se utilizan tokens JWT (JSON Web Tokens) para la autenticación.
+- Las contraseñas se almacenan de manera segura mediante hashing.
 
-## Future Improvements
+## Mejoras Futuras
 
-- Implement real-time balance updates
-- Add transaction history feature
-- Enhance error handling and user feedback
-- Implement unit and integration tests
+- Implementar actualizaciones de saldo en tiempo real
+- Agregar característica de historial de transacciones
+- Mejorar el manejo de errores y la retroalimentación al usuario
+- Implementar pruebas unitarias e de integración
 
-## Contributing
+## Cómo Contribuir
 
-Contributions are welcome! Here's how you can contribute to this project:
+¡Las contribuciones son bienvenidas! Aquí está cómo puedes contribuir a este proyecto:
 
-1. Fork the repository
-2. Clone your forked repository:
+1. Haz un fork del repositorio.
+2. Clona tu repositorio bifurcado:
    ```
    git clone https://github.com/cristianchivisky/digital-wallet-demo.git
    ```
-3. Create a new branch for your feature:
+3. Crea una nueva rama para tu característica:
    ```
-   git checkout -b feature/your-feature-name
+   git checkout -b feature/tu-caracteristica
    ```
-4. Make your changes and commit them:
+4. Realiza tus cambios y hazles commit:
    ```
-   git commit -m "Add your commit message here"
+   git commit -m "Agrega tu mensaje de commit aquí"
    ```
-5. Push your changes to your fork:
+5. Sube tus cambios a tu fork:
    ```
-   git push origin feature/your-feature-name
+   git push origin feature/tu-caracteristica
    ```
-6. Create a Pull Request from your forked repository to the original repository
+6. Crea un Pull Request desde tu repositorio bifurcado al repositorio original
 
-Please ensure your code adheres to the existing style and that you've tested your changes before submitting a Pull Request.
+Asegúrate de que tu código se adhiere al estilo existente y que has probado tus cambios antes de enviar un Pull Request.
 
-## License
+## Licencia
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+Este proyecto se encuentra bajo la Licencia MIT. Consulta el archivo LICENSE para más detalles.

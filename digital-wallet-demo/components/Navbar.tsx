@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
+import { View, Image, Text, StyleSheet, TouchableOpacity, Modal } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../hooks/authContext';
 
@@ -7,6 +7,7 @@ export default function Navbar() {
   const { isAuthenticated, user } = useAuth(); 
   const [modalVisible, setModalVisible] = useState(false);
 
+  // Función para alternar la visibilidad del modal
   const toggleModal = () => {
     setModalVisible(!modalVisible);
   };

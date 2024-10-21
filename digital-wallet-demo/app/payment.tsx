@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToastNotification from '../components/ToastNotification';
 import { Ionicons } from '@expo/vector-icons'; 
+import { useAuth } from '../hooks/authContext';
+import { jwtDecode } from 'jwt-decode';
 
 type ToastType = 'success' | 'danger';
 
 export default function Payment() {
   const router = useRouter();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
   const { transactionId, amount } = useLocalSearchParams<{ transactionId: string; amount: string }>(); // Obtiene los parámetros de la URL
   const [isPaying, setIsPaying] = useState(false);
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
@@ -24,6 +27,34 @@ export default function Payment() {
   const hideToast = () => {
     setToast(prevToast => ({ ...prevToast, visible: false }));
   };
+
+  // Verifica si el token es válido y no ha expirado
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        if (!token) {
+          // Si no hay token, redirigir al usuario a /index
+          setIsAuthenticated(false);
+          router.push('./');
+        } else {
+          // Decodificar el token para verificar si ha expirado
+          const decoded: { exp: number } = jwtDecode(token);
+          if (decoded.exp < Date.now() / 1000) {
+            // Si el token ha expirado, redirigir al usuario a /index
+            await AsyncStorage.removeItem('accessToken');
+            await AsyncStorage.removeItem('userData');
+            setIsAuthenticated(false);
+            router.push('./');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking login:', error);
+      }
+    };
+
+    checkLogin();
+  }, [router]);
 
   // Función para manejar el proceso de pago
   const handlePayment = async () => {

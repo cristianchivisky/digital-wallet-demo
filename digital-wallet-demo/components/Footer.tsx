@@ -7,10 +7,11 @@ import { useRouter } from 'expo-router';
 import { useApp } from '../hooks/appContext';
 
 export default function Footer() {
-  const { isAuthenticated, setIsAuthenticated } = useAuth(); 
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
   const router = useRouter();
   const { scanQRCode } = useApp();
 
+  // Verifica si hay un token almacenado para determinar si el usuario está autenticado
   useEffect(() => {
     const checkAuthentication = async () => {
       const token = await AsyncStorage.getItem('accessToken');
@@ -19,10 +20,12 @@ export default function Footer() {
     checkAuthentication();
   }, []);
 
+  // Función para redirigir a la pantalla principal
   const handleHome = () => {
     router.push('./home');
   };
 
+  // Función para cerrar sesión, eliminando el token de almacenamiento y redirigiendo
   const handleLogout = async () => {
     await AsyncStorage.removeItem('accessToken');
     await AsyncStorage.removeItem('userData');
@@ -45,8 +48,8 @@ export default function Footer() {
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2024 Digital Wallet. All rights reserved.</Text>
+        <View style={styles.footerText}>
+          <Text style={styles.text}>© 2024 Digital Wallet. All rights reserved.</Text>
         </View>
       )}
     </View>
@@ -56,11 +59,11 @@ export default function Footer() {
 const styles = StyleSheet.create({
   footer: {
     backgroundColor: '#1F2937',
-    paddingVertical: 18,
+    paddingVertical: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 40,
+    paddingHorizontal: 70,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -3 },
     shadowOpacity: 0.25,
@@ -73,23 +76,41 @@ const styles = StyleSheet.create({
   scanButton: {
     backgroundColor: '#007bff',
     borderRadius: 50,
-    padding: 20,
+    padding: 16,
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 5,
-    height: 80,
-    width: 80,
+    height: 70,
+    width: 70,
     position: 'absolute',
     left: '50%',
-    marginLeft: -40,
-    bottom: 17,
+    marginLeft: -35,
+    bottom: 10,
+    borderColor: '#fff',
+    borderWidth: 2,
   },
   footerText: {
+    backgroundColor: '#1F2937',
+    paddingVertical: 10,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 6,
+    width: '100%',
+    position: 'absolute',
+    bottom: 0,
+  },
+  text: {
     color: '#FFFFFF',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '400',
     textAlign: 'center',
     letterSpacing: 0.5,
-    paddingVertical: 10, 
+    paddingVertical: 8, 
   },
 });

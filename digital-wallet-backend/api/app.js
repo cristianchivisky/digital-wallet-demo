@@ -85,7 +85,7 @@ app.post('/login', async (req, res) => {
   // Verificamos si el usuario existe y si la contraseña es correcta
   if (user && await bcrypt.compare(password, user.password)) {
     // Generamos un token de acceso JWT usando la clave secreta
-    const accessToken = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY);
+    const accessToken = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
     res.json({ accessToken });
   } else {
     res.status(400).send('Username or password incorrect');

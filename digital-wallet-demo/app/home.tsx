@@ -5,6 +5,8 @@ import { useRouter } from "expo-router";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import ToastNotification from '../components/ToastNotification';
 import { useApp } from '../hooks/appContext';
+import { useAuth } from '../hooks/authContext';
+import { jwtDecode } from 'jwt-decode';
 
 type ToastType = 'success' | 'danger';
 interface Payment {
@@ -16,6 +18,7 @@ interface Payment {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { isAuthenticated, setIsAuthenticated } = useAuth();
   const [balance, setBalance] = useState(null);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [permission, requestPermission] = useCameraPermissions(); // Estado y permisos de la cámara
@@ -37,6 +40,33 @@ export default function HomeScreen() {
     setToast(prevToast => ({ ...prevToast, visible: false }));
   };
 
+  // Verifica si el token existe y no ha expirado
+  useEffect(() => {
+    const checkLogin = async () => {
+      try {
+        const token = await AsyncStorage.getItem('accessToken');
+        if (!token) {
+          // Si no hay token, redirigir al usuario a /index
+          setIsAuthenticated(false);
+          router.push('./');
+        } else {
+          // Decodificar el token para verificar si ha expirado
+          const decoded: { exp: number } = jwtDecode(token);
+          if (decoded.exp < Date.now() / 1000) {
+            // Si el token ha expirado, redirigir al usuario a /index
+            await AsyncStorage.removeItem('accessToken');
+            await AsyncStorage.removeItem('userData');
+            setIsAuthenticated(false);
+            router.push('./');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking login:', error);
+      }
+    };
+    checkLogin();
+  }, [router]);
+
   // Función que se activa al presionar el botón para escanear un QR
   const handleScanQRCode = async () => {
     setIsCameraActive(true); // Activa la cámara
@@ -53,11 +83,15 @@ export default function HomeScreen() {
         }
       });
       const qrData = await response.json(); // Parsear la respuesta de la API
-      // Si la respuesta es exitosa, redirige a la pantalla de pago después de 8 segundos
+      // Si la respuesta es exitosa muestra el QR en la terminal
       if (response.ok) {
-        console.log('QR Code Data:', qrData); // Mostrar el QR en la terminal
+        console.log('QR Code Data:', qrData);
+        // redirige a la pantalla de pago con los datos del QR después de 8 segundos
+        // esto está así porque lo deasarrolle usando la web y no pude escanear el QR
+        // aunque sí lo probé desde Expo Go y funciona todo correctamente 
+        // esta parte del código se debería quitar en producción
         setTimeout(() => {
-          setIsCameraActive(false); // Desactiva la cámara
+          setIsCameraActive(false);
           router.push({
             pathname: "./payment",
             params: {
@@ -67,7 +101,6 @@ export default function HomeScreen() {
           });
         }, 8000);
       } else {
-        // Si falla, muestra un mensaje de error
         showToast('Failed to generate QR code', 'danger');
       }
     } catch (error) {
@@ -82,7 +115,6 @@ export default function HomeScreen() {
     const fetchData = async () => {
       try {
         const token = await AsyncStorage.getItem('accessToken');
-
         // Obtiene el balance
         const balanceResponse = await fetch('http://localhost:3000/balance', {
           method: 'GET',
@@ -93,6 +125,7 @@ export default function HomeScreen() {
         });
         const balanceData = await balanceResponse.json();
         setBalance(balanceData.balance);
+        // Oredena los pagos por fecha
         const sortedPayments = balanceData.payments.sort((a: Payment, b: Payment) => {
           const dateA = new Date(a.timestamp);
           const dateB = new Date(b.timestamp);
@@ -130,10 +163,9 @@ export default function HomeScreen() {
   // Función que maneja el escaneo del código de barras o QR
   const handleBarcodeScanned = ({ data }: { data: string }) => {
     setScanned(true); // Indica que el código fue escaneado
-    setIsCameraActive(false); // Desactiva la cámara
+    setIsCameraActive(false); 
     try {
       const transactionDetails = JSON.parse(data); // Intenta parsear el QR a JSON
-      // Redirige a la pantalla de pago con los detalles de la transacción obtenidos
       router.push({
         pathname: "./payment",
         params: {
@@ -142,7 +174,6 @@ export default function HomeScreen() {
         },
       });
     } catch (error) {
-      // Si el QR no es válido, se muestra un mensaje de error
       showToast(`Invalid QR code: ${data}`, 'danger');
     }
   };
@@ -167,25 +198,27 @@ export default function HomeScreen() {
           </View>
         </View>
       ) : (
-        // Hacer scroll solo en la lista de pagos
         <View style={styles.container}>
           <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
             <View style={styles.paymentsContainer}>
               <Text style={styles.paymentsTitle}>Payments:</Text>
-              <FlatList
-                data={payments}
-                keyExtractor={item => item.paymentId}
-                renderItem={({ item }) => (
-                  <View style={styles.paymentCard}>
-                    <Text style={styles.paymentText}>Transaction ID: {item.transactionId}</Text>
-                    <Text style={styles.paymentText}>Amount: ${item.amount}</Text>
-                    <Text style={styles.paymentText}>Date: {new Date(item.timestamp).toLocaleString()}</Text> {/* Mejora la visibilidad de la fecha */}
-                  </View>
-                )}
-              />
+              {payments.length === 0 ? (
+                <Text style={styles.paymentText}>No payments made yet</Text>
+              ) : (
+                <FlatList
+                  data={payments}
+                  keyExtractor={item => item.paymentId}
+                  renderItem={({ item }) => (
+                    <View style={styles.paymentCard}>
+                      <Text style={styles.paymentText}>Transaction ID: {item.transactionId}</Text>
+                      <Text style={styles.paymentText}>Amount: ${item.amount}</Text>
+                      <Text style={styles.paymentText}>Date: {new Date(item.timestamp).toLocaleString()}</Text> {/* Mejora la visibilidad de la fecha */}
+                    </View>
+                  )}
+                />
+              )}
             </View>
           </ScrollView>
-          
         </View>
       )}
 

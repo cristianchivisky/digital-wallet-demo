@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../hooks/authContext';
@@ -33,7 +33,7 @@ export default function AuthScreen() {
       }
     };
 
-    checkAuthStatus(); // Ejecutar la función al montar el componente
+    checkAuthStatus();
   }, []);
 
   const showToast = (message: string, type: ToastType) => {
@@ -52,15 +52,14 @@ export default function AuthScreen() {
       showToast(error, 'danger');
       return;
     }
-    setIsLoading(true); // Indicar que se está cargando
+    setIsLoading(true);
     try {
-      // Realizar solicitud de login
       const response = await fetch('http://192.168.1.4:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password }), // Enviar credenciales
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
@@ -71,14 +70,12 @@ export default function AuthScreen() {
         setIsAuthenticated(true);
         router.push('./home'); // Redirigir a la pantalla principal
       } else {
-        // Mostrar un mensaje de error si el login falla
         showToast(data.message || 'Login failed. Please try again.', 'danger');
       }
     } catch (error) {
-      // Manejar errores de red
       showToast('Network error. Please try again.', 'danger');
     } finally {
-      setIsLoading(false); // Desactivar estado de carga
+      setIsLoading(false);
     }
   };
 
@@ -94,32 +91,28 @@ export default function AuthScreen() {
       showToast('Passwords do not match.', 'danger');
       return;
     }
-    setIsLoading(true); // Indicar que se está cargando
+    setIsLoading(true);
     const balance = 10000; // Establecer un balance inicial para el nuevo usuario
     try {
-      // Realizar solicitud de registro
-      const response = await fetch('http://192.168.1.4:3000/register', {
+      const response = await fetch('http://localhost:3000/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password, balance }), // Enviar datos de registro
+        body: JSON.stringify({ username, password, balance }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        // Mostrar mensaje de éxito en el registro
         showToast('Registration successful!', 'success');
         setIsRegistering(false); // Cambiar a modo de login tras el registro exitoso
       } else {
-        // Mostrar mensaje de error si el registro falla
         showToast(data.message || 'Registration failed. Please try again.', 'danger');
       }
     } catch (error) {
-      // Manejar errores de red
       showToast('Network error. Please try again.', 'danger');
     } finally {
-      setIsLoading(false); // Desactivar estado de carga
+      setIsLoading(false);
     }
   };
 
@@ -206,7 +199,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
     backgroundColor: '#f0f2f5',
   },
   title: {
