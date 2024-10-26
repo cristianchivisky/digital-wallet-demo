@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform  } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAuth } from '../hooks/authContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,18 +32,22 @@ export default function Footer() {
     setIsAuthenticated(false);
     router.push('./');
   };
-
+  
   return (
     <View>
       {isAuthenticated ? (
         <View style={styles.footer}>
-          <TouchableOpacity onPress={handleHome}>
+          <TouchableOpacity style={styles.iconButton} onPress={handleHome}>
             <MaterialIcons name="home" size={30} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity style={styles.scanButton} onPress={scanQRCode}>
-            <MaterialIcons name="qr-code-scanner" size={42} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity onPress={handleLogout}>
+          <View style={styles.scanButtonContainer}>
+            <TouchableOpacity style={styles.scanButton} onPress={scanQRCode}>
+              <View style={styles.iconContainer}>
+                <MaterialIcons name="qr-code-scanner" size={42} color="#fff" />
+              </View>
+            </TouchableOpacity>
+          </View>
+          <TouchableOpacity style={styles.iconButton} onPress={handleLogout}>
             <MaterialIcons name="logout" size={30} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -54,63 +58,75 @@ export default function Footer() {
       )}
     </View>
   );
-}
-
-const styles = StyleSheet.create({
-  footer: {
-    backgroundColor: '#1F2937',
-    paddingVertical: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 70,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 6,
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-  },
-  scanButton: {
-    backgroundColor: '#007bff',
-    borderRadius: 50,
-    padding: 16,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 5,
-    height: 70,
-    width: 70,
-    position: 'absolute',
-    left: '50%',
-    marginLeft: -35,
-    bottom: 10,
-    borderColor: '#fff',
-    borderWidth: 2,
-  },
-  footerText: {
-    backgroundColor: '#1F2937',
-    paddingVertical: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 6,
-    width: '100%',
-    position: 'absolute',
-    bottom: 0,
-  },
-  text: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '400',
-    textAlign: 'center',
-    letterSpacing: 0.5,
-    paddingVertical: 8, 
-  },
-});
+  };
+  
+  const styles = StyleSheet.create({
+    footer: {
+      backgroundColor: '#1F2937',
+      paddingVertical: 12,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingHorizontal: 40,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -3 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 6,
+      width: '100%',
+      position: 'absolute',
+      bottom: 0,
+    },
+    iconButton: {
+      width: 30, 
+      zIndex: 1,
+    },
+    scanButtonContainer: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      bottom: 5,
+      alignItems: 'center',
+      zIndex: 0,
+    },
+    scanButton: {
+      backgroundColor: '#007bff',
+      borderRadius: 35,
+      height: 70,
+      width: 70,
+      borderColor: '#fff',
+      borderWidth: 2,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 0, // Eliminamos el padding
+    },
+    iconContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    footerText: {
+      backgroundColor: '#1F2937',
+      paddingVertical: 10,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: -3 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 6,
+      width: '100%',
+      position: 'absolute',
+      bottom: 0,
+    },
+    text: {
+      color: '#FFFFFF',
+      fontSize: 13,
+      fontWeight: '400',
+      textAlign: 'center',
+      letterSpacing: 0.5,
+      paddingVertical: 8,
+    },
+  });

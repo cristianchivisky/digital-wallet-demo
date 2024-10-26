@@ -54,7 +54,7 @@ export default function AuthScreen() {
     }
     setIsLoading(true);
     try {
-      const response = await fetch('http://192.168.1.4:3000/login', {
+      const response = await fetch('https://localhost:3000/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ export default function AuthScreen() {
     setIsLoading(true);
     const balance = 10000; // Establecer un balance inicial para el nuevo usuario
     try {
-      const response = await fetch('http://localhost:3000/register', {
+      const response = await fetch('https://localhost:3000/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

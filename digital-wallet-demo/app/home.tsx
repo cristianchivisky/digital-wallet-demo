@@ -7,6 +7,8 @@ import ToastNotification from '../components/ToastNotification';
 import { useApp } from '../hooks/appContext';
 import { useAuth } from '../hooks/authContext';
 import { jwtDecode } from 'jwt-decode';
+import QRCode from 'qrcode-terminal';
+
 
 type ToastType = 'success' | 'danger';
 interface Payment {
@@ -75,7 +77,7 @@ export default function HomeScreen() {
       const token = await AsyncStorage.getItem('accessToken');
       // Solicitud para generar un código QR con una cantidad fija (random)
       const amount = Math.floor(Math.random() * 1000); // Genera un número aleatorio entre 0 y 999
-      const response = await fetch(`http://localhost:3000/generate-qr?amount=${amount}`, {
+      const response = await fetch(`https://localhost:3000/generate-qr?amount=${amount}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -86,11 +88,15 @@ export default function HomeScreen() {
       // Si la respuesta es exitosa muestra el QR en la terminal
       if (response.ok) {
         console.log('QR Code Data:', qrData);
+        const transactionData = JSON.stringify(qrData.transactionDetails);
+        console.log('Transaction QR:');
+        // Genera el QR en la terminal
+        QRCode.generate(transactionData, { small: true });
         // redirige a la pantalla de pago con los datos del QR después de 8 segundos
         // esto está así porque lo deasarrolle usando la web y no pude escanear el QR
         // aunque sí lo probé desde Expo Go y funciona todo correctamente 
         // esta parte del código se debería quitar en producción
-        setTimeout(() => {
+        /**setTimeout(() => {
           setIsCameraActive(false);
           router.push({
             pathname: "./payment",
@@ -99,7 +105,7 @@ export default function HomeScreen() {
               amount: qrData.transactionDetails.amount,
             },
           });
-        }, 8000);
+        }, 8000);*/
       } else {
         showToast('Failed to generate QR code', 'danger');
       }
@@ -116,7 +122,7 @@ export default function HomeScreen() {
       try {
         const token = await AsyncStorage.getItem('accessToken');
         // Obtiene el balance
-        const balanceResponse = await fetch('http://localhost:3000/balance', {
+        const balanceResponse = await fetch('https://localhost:3000/balance', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -187,9 +193,9 @@ export default function HomeScreen() {
       {isCameraActive ? (
         <View style={styles.cameraContainer}>
           <CameraView
-            style={styles.camera} 
+            style={styles.camera}
             facing={facing}
-            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned} 
+            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
           />
           <View style={styles.buttonContainer}>
             <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
@@ -198,27 +204,23 @@ export default function HomeScreen() {
           </View>
         </View>
       ) : (
-        <View style={styles.container}>
-          <ScrollView contentContainerStyle={{ paddingBottom: 120 }}>
-            <View style={styles.paymentsContainer}>
-              <Text style={styles.paymentsTitle}>Payments:</Text>
-              {payments.length === 0 ? (
-                <Text style={styles.paymentText}>No payments made yet</Text>
-              ) : (
-                <FlatList
-                  data={payments}
-                  keyExtractor={item => item.paymentId}
-                  renderItem={({ item }) => (
-                    <View style={styles.paymentCard}>
-                      <Text style={styles.paymentText}>Transaction ID: {item.transactionId}</Text>
-                      <Text style={styles.paymentText}>Amount: ${item.amount}</Text>
-                      <Text style={styles.paymentText}>Date: {new Date(item.timestamp).toLocaleString()}</Text> {/* Mejora la visibilidad de la fecha */}
-                    </View>
-                  )}
-                />
+        <View style={styles.paymentsContainer}>
+          <Text style={styles.paymentsTitle}>Payments:</Text>
+          {payments.length === 0 ? (
+            <Text style={styles.paymentText}>No payments made yet</Text>
+          ) : (
+            <FlatList
+              data={payments}
+              keyExtractor={item => item.paymentId}
+              renderItem={({ item }) => (
+                <View style={styles.paymentCard}>
+                  <Text style={styles.paymentText}>Transaction ID: {item.transactionId}</Text>
+                  <Text style={styles.paymentText}>Amount: ${item.amount}</Text>
+                  <Text style={styles.paymentText}>Date: {new Date(item.timestamp).toLocaleString()}</Text>
+                </View>
               )}
-            </View>
-          </ScrollView>
+            />
+          )}
         </View>
       )}
 
@@ -239,6 +241,7 @@ export default function HomeScreen() {
         />
       )}
     </SafeAreaView>
+
   );
 };
 
@@ -346,6 +349,7 @@ const styles = StyleSheet.create({
   },
   paymentsContainer: {
     paddingHorizontal: 20,
+    paddingBottom: 170,
   },
   paymentsTitle: {
     fontSize: 22,

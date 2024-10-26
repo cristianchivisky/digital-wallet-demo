@@ -53,3 +53,5 @@ dump.rdb
 
 # Archivos de respaldo
 *.bak
+
+/ngrok.exe

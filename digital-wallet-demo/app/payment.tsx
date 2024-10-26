@@ -69,7 +69,7 @@ export default function Payment() {
       // Recupera el token de acceso desde AsyncStorage
       const token = await AsyncStorage.getItem('accessToken');
       // Realiza la solicitud para procesar el pago
-      const response = await fetch('http://localhost:3000/process-payment', {
+      const response = await fetch('https://localhost:3000/process-payment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
