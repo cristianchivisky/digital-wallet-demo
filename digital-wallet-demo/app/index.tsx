@@ -16,6 +16,7 @@ export default function AuthScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false); // Estado para alternar entre login y registro
   const { setIsAuthenticated } = useAuth(); // Contexto para gestionar el estado de autenticación
+  const baseUrl = process.env.EXPO_PUBLIC_NGROK_URL || 'http://localhost:3000';
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
     visible: false,
     message: '',
@@ -54,7 +55,7 @@ export default function AuthScreen() {
     }
     setIsLoading(true);
     try {
-      const response = await fetch('https://localhost:3000/login', {
+      const response = await fetch(`${baseUrl}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export default function AuthScreen() {
     setIsLoading(true);
     const balance = 10000; // Establecer un balance inicial para el nuevo usuario
     try {
-      const response = await fetch('https://localhost:3000/register', {
+      const response = await fetch(`${baseUrl}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

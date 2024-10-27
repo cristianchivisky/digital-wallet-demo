@@ -27,6 +27,7 @@ export default function HomeScreen() {
   const [scanned, setScanned] = useState(false); // Estado para gestionar si el código QR fue escaneado
   const [isCameraActive, setIsCameraActive] = useState(false); // Estado para activar o desactivar la cámara
   const [facing, setFacing] = useState<CameraType>('back'); // Estado para alternar la cámara entre frontal y trasera
+  const baseUrl = process.env.EXPO_PUBLIC_NGROK_URL || 'http://localhost:3000';
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
     visible: false,
     message: '',
@@ -77,7 +78,7 @@ export default function HomeScreen() {
       const token = await AsyncStorage.getItem('accessToken');
       // Solicitud para generar un código QR con una cantidad fija (random)
       const amount = Math.floor(Math.random() * 1000); // Genera un número aleatorio entre 0 y 999
-      const response = await fetch(`https://localhost:3000/generate-qr?amount=${amount}`, {
+      const response = await fetch(`${baseUrl}/generate-qr?amount=${amount}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -122,7 +123,7 @@ export default function HomeScreen() {
       try {
         const token = await AsyncStorage.getItem('accessToken');
         // Obtiene el balance
-        const balanceResponse = await fetch('https://localhost:3000/balance', {
+        const balanceResponse = await fetch(`${baseUrl}/balance`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -206,20 +207,20 @@ export default function HomeScreen() {
       ) : (
         <View style={styles.paymentsContainer}>
           <Text style={styles.paymentsTitle}>Payments:</Text>
-          {payments.length === 0 ? (
-            <Text style={styles.paymentText}>No payments made yet</Text>
-          ) : (
+          {payments.length != 0 ? (
             <FlatList
-              data={payments}
-              keyExtractor={item => item.paymentId}
-              renderItem={({ item }) => (
-                <View style={styles.paymentCard}>
-                  <Text style={styles.paymentText}>Transaction ID: {item.transactionId}</Text>
-                  <Text style={styles.paymentText}>Amount: ${item.amount}</Text>
-                  <Text style={styles.paymentText}>Date: {new Date(item.timestamp).toLocaleString()}</Text>
-                </View>
-              )}
+            data={payments}
+            keyExtractor={item => item.paymentId}
+            renderItem={({ item }) => (
+              <View style={styles.paymentCard}>
+                <Text style={styles.paymentText}>Transaction ID: {item.transactionId}</Text>
+                <Text style={styles.paymentText}>Amount: ${item.amount}</Text>
+                <Text style={styles.paymentText}>Date: {new Date(item.timestamp).toLocaleString()}</Text>
+              </View>
+            )}
             />
+          ) : (
+            <Text style={styles.paymentText}>No payments made yet</Text>
           )}
         </View>
       )}

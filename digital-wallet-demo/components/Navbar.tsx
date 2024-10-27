@@ -15,10 +15,9 @@ export default function Navbar() {
   return (
     <View style={styles.navbar}>
       {isAuthenticated ? (
-          <Text style={styles.welcome}>Hola, {user}</Text> 
-          
+        <Text style={styles.welcome}>Hola, {user}</Text> 
       ) : (
-          <Text style={styles.title}>Digital Wallet</Text>
+        <Text style={styles.title}>Digital Wallet</Text>
       )}
       <TouchableOpacity  onPress={toggleModal}>
         <Ionicons name="information-circle-outline" size={28} color="#fff" />

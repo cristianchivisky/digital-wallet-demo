@@ -14,6 +14,7 @@ export default function Payment() {
   const { isAuthenticated, setIsAuthenticated } = useAuth();
   const { transactionId, amount } = useLocalSearchParams<{ transactionId: string; amount: string }>(); // Obtiene los parámetros de la URL
   const [isPaying, setIsPaying] = useState(false);
+  const baseUrl = process.env.EXPO_PUBLIC_NGROK_URL || 'http://localhost:3000';
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
     visible: false,
     message: '',
@@ -69,7 +70,7 @@ export default function Payment() {
       // Recupera el token de acceso desde AsyncStorage
       const token = await AsyncStorage.getItem('accessToken');
       // Realiza la solicitud para procesar el pago
-      const response = await fetch('https://localhost:3000/process-payment', {
+      const response = await fetch(`${baseUrl}/process-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +148,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    top: 40,
+    top: 20,
     left: 20,
     zIndex: 10,
   },
