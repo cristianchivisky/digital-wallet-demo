@@ -94,9 +94,7 @@ export default function HomeScreen() {
         // Genera el QR en la terminal
         QRCode.generate(transactionData, { small: true });
         // redirige a la pantalla de pago con los datos del QR después de 8 segundos
-        // esto está así porque lo deasarrolle usando la web y no pude escanear el QR
-        // aunque sí lo probé desde Expo Go y funciona todo correctamente 
-        // esta parte del código se debería quitar en producción
+        // esto porque lo deasarrolle usando la web y no pude escanear el QR
         /**setTimeout(() => {
           setIsCameraActive(false);
           router.push({

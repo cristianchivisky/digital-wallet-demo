@@ -79,18 +79,33 @@ app.post('/register', async (req, res) => {
 
 // Ruta de login para autenticar a los usuarios
 app.post('/login', async (req, res) => {
-  const { username, password } = req.body;
-  // Buscamos al usuario en la base de datos Redis
-  const user = await redisClient.hGetAll(`user:${username}`);
-  // Verificamos si el usuario existe y si la contraseña es correcta
-  if (user && await bcrypt.compare(password, user.password)) {
+  try {
+    const { username, password } = req.body;
+    
+    // Buscamos al usuario en la base de datos Redis
+    const user = await redisClient.hGetAll(`user:${username}`);
+    
+    // Verificar si el usuario existe
+    if (Object.keys(user).length === 0) {
+      return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+    }
+    
+    // Verificar la contraseña
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
+    }
+    
     // Generamos un token de acceso JWT usando la clave secreta
     const accessToken = jwt.sign({ id: user.id, username: user.username }, SECRET_KEY, { expiresIn: '1h' });
-    res.json({ accessToken });
-  } else {
-    res.status(400).send('Username or password incorrect');
+    return res.status(200).json({ accessToken });
+    
+  } catch (error) {
+    console.error('Error en el proceso de login:', error);
+    return res.status(500).json({ message: 'Ha ocurrido un error inesperado' });
   }
 });
+
 
 // Ruta para generar un código QR
 app.get('/generate-qr', authenticateToken, async (req, res) => {

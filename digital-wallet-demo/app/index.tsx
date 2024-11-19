@@ -15,14 +15,14 @@ export default function AuthScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false); // Estado para alternar entre login y registro
-  const { setIsAuthenticated } = useAuth(); // Contexto para gestionar el estado de autenticación
+  const { setIsAuthenticated, setUser } = useAuth(); // Contexto para gestionar el estado de autenticación
   const baseUrl = process.env.EXPO_PUBLIC_NGROK_URL || 'http://localhost:3000';
   const [toast, setToast] = useState<{ visible: boolean; message: string; type: ToastType }>({
     visible: false,
     message: '',
     type: 'success',
   });
-
+  
   // Verificar autenticación al montar el componente
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -30,7 +30,7 @@ export default function AuthScreen() {
       if (token) {
         // Si el token existe, redirige a la pantalla principal
         setIsAuthenticated(true);
-        router.replace('./home'); // Reemplazar para evitar volver atrás
+        router.replace('./home');
       }
     };
 
@@ -69,6 +69,7 @@ export default function AuthScreen() {
         await AsyncStorage.setItem('accessToken', data.accessToken);
         await AsyncStorage.setItem('userData', username);
         setIsAuthenticated(true);
+        setUser(username)
         router.push('./home'); // Redirigir a la pantalla principal
       } else {
         showToast(data.message || 'Login failed. Please try again.', 'danger');
